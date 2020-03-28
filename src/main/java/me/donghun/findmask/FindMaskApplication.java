@@ -9,7 +9,7 @@ public class FindMaskApplication {
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(FindMaskApplication.class);
-        app.setWebApplicationType(WebApplicationType.NONE);
+        app.setWebApplicationType(WebApplicationType.SERVLET);
         app.run(args);
     }
 

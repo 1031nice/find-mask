@@ -17,7 +17,7 @@ import java.nio.charset.Charset;
 import java.util.Dictionary;
 import java.util.Map;
 
-@Component
+//@Component
 public class MyRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
