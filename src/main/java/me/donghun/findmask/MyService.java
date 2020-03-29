@@ -1,5 +1,7 @@
 package me.donghun.findmask;
 
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -36,27 +38,44 @@ public class MyService {
         return storeInfos;
     }
 
-    public ArrayList<String> getAddress(String addr) throws IOException {
+    public JSONArray getAddress(String inputAddr) throws IOException {
         URL url  = new URL("https://8oi9s0nnth.apigw.ntruss.com/corona19-masks/v1/stores/json?page=1");
         InputStream inputStream = url.openStream();
         String jsonText = readAll(inputStream);
         JSONObject json = new JSONObject(jsonText);
         int totalPages = (int) json.get("totalPages");
-        MyArrayList<String> ret = new MyArrayList<>();
+        JSONArray ret = new JSONArray();
         for(int i=1; i<=1; i++){
             String urlString = "https://8oi9s0nnth.apigw.ntruss.com/corona19-masks/v1/stores/json?page=" + i;
             URL each_url = new URL(urlString);
             inputStream = each_url.openStream();
             jsonText = readAll(inputStream);
             json = new JSONObject(jsonText);
+            System.out.println(json.toString());
+            System.out.println();
             JSONArray storeInfos = (JSONArray) json.get("storeInfos");
             for(int j=0; j < storeInfos.length(); j++){
                 JSONObject jsonObject = storeInfos.getJSONObject(j);
-                String _addr = (String) jsonObject.get("addr");
-                if(_addr.split(" ")[0].contains(addr))
-                    ret.add(_addr);
+                String addr = (String) jsonObject.get("addr");
+//                JSONObject newJsonObject = new JSONObject();
+                MyLocation location = new MyLocation();
+                if(addr.contains(inputAddr)) {
+                    location.setAddr(addr);
+                    location.setLat((double)jsonObject.get("lat"));
+                    location.setLng((double)jsonObject.get("lng"));
+                    location.setName((String)jsonObject.get("name"));
+                    location.setCode((String)jsonObject.get("code"));
+//                    newJsonObject.put("name", jsonObject.get("name"))
+//                            .put("addr", addr)
+//                            .put("lng", jsonObject.get("lng"))
+//                            .put("lat", jsonObject.get("lat"));
+//                    System.out.println(newJsonObject.toString());
+//                    ret.put(newJsonObject);
+                    ret.put(location);
+                }
             }
         }
+        System.out.println(ret.toString());
         return ret;
     }
 

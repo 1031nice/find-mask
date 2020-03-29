@@ -3,10 +3,8 @@ package me.donghun.findmask;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
@@ -27,10 +25,16 @@ public class MyController {
     }
 
     @GetMapping("/address/{addr}")
+    public String findByAddress(@PathVariable("addr") String addr, Model model) throws IOException {
+        JSONArray addresses = myService.getAddress(addr);
+        model.addAttribute("addresses", addresses);
+        return "list";
+    }
+
+    @PostMapping("/code")
     @ResponseBody
-    public String findByAddress(@PathVariable("addr") String addr) throws IOException {
-        ArrayList<String> addresses = myService.getAddress(addr);
-        return addresses.toString();
+    public String showLocationByCode(@RequestParam String lat, @RequestParam String lng) {
+        return "lat: " + lat + " lng: " + lng;
     }
 
 }
