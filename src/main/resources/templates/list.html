@@ -10,7 +10,7 @@
 <!--</td>-->
 
 <td th:each="address : ${addresses}">
-    <form action="#" th:action="@{'/code'}" method="post" th:object="${address}">
+    <form action="#" th:action="@{'/image'}" method="post" th:object="${address}">
         <input type="hidden" name="lng" th:value="${address.lng}">
         <input type="hidden" name="lat" th:value="${address.lat}">
         <input type="submit" th:value="${address.name}">
