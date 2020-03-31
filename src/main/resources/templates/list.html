@@ -13,7 +13,7 @@
     <form action="#" th:action="@{'/image'}" method="post" th:object="${address}">
         <input type="hidden" name="lng" th:value="${address.lng}">
         <input type="hidden" name="lat" th:value="${address.lat}">
-        <input type="submit" th:value="${address.name}">
+        <input type="submit" th:value="${address.name}+'('+${address.addr}+')'">
     </form>
 </td>
 

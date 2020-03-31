@@ -2,19 +2,10 @@ package me.donghun.findmask;
 
 public class MyLocation {
 
-    String code;
     String name;
     String addr;
     double lat;
     double lng;
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
 
     public String getName() {
         return name;

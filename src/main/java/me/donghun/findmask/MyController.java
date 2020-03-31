@@ -12,22 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.ImageInputStreamImpl;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Scanner;
 
 @Controller
 public class MyController {
@@ -35,109 +26,73 @@ public class MyController {
     @Autowired
     MyService myService;
 
-
-    @GetMapping("/page/{pageNum}")
+    // ResponseBody로 JSONArray를 보내는건 안되는듯하다 JSONObject도 안되네 toString 붙여야되나
+    @GetMapping("/test")
     @ResponseBody
-    public String findByPage(@PathVariable("pageNum") int pageNum) throws IOException {
-          JSONArray page = myService.getPage(pageNum);
-          return page.toString();
+    public String test() throws IOException {
+       return myService.init().toString();
     }
 
+    // n개씩 끊어서 m개의 페이지로 제공하고 싶은데 이건 담당자가 M이냐 V냐 C냐
     @GetMapping("/address")
     public String findByAddress(@RequestParam("addr") String addr, Model model) throws IOException {
-        JSONArray addresses = myService.getAddress(addr);
+        JSONArray addresses = myService.findByAddress(addr);
         model.addAttribute("addresses", addresses);
         return "list";
     }
 
-    @PostMapping("/code")
-    @ResponseBody
-    public String showLocationByCode(@RequestParam String lng, @RequestParam String lat) {
-        String ID = "brig18d08p";
-        String PW = "BjXKCJOwOn8BmyyrPaa07l9CRMg9jf6fpRqGPqtK";
-        String coords = lng + "," + lat;
-        HttpURLConnection conn = null;
-        JSONObject responseJson = null;
-        try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc");
-            sb.append("?coords=" + coords);
-            sb.append("&output=json");
-            sb.append("&request=coordsToaddr");
-            URL url = new URL(sb.toString());
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("X-NCP-APIGW-API-KEY-ID", ID);
-            conn.setRequestProperty("X-NCP-APIGW-API-KEY", PW);
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 400) {
-                System.out.println("400");
-            } else if (responseCode == 401) {
-                System.out.println("401");
-            } else if (responseCode == 500) {
-                System.out.println("500");
-            } else { // 성공
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                sb = new StringBuilder();
-                String line = "";
-                while ((line = br.readLine()) != null) {
-                    sb.append(line);
-                }
-                System.out.println(sb.toString());
-                return sb.toString();
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @GetMapping("/test")
-    public String test(){
-        return "showLocation";
-    }
+    // 위도 경도를 이용해서 주소를 찾을 일이 없을듯. 어차피 공적 데이터에 위도 경도 주소 다 나오므로
+//    @PostMapping("/code")
+//    @ResponseBody
+//    public String showLocationByCode(@RequestParam String lng, @RequestParam String lat) {
+//        String ID = "brig18d08p";
+//        String PW = "BjXKCJOwOn8BmyyrPaa07l9CRMg9jf6fpRqGPqtK";
+//        String coords = lng + "," + lat;
+//        HttpURLConnection conn = null;
+//        JSONObject responseJson = null;
+//        try {
+//            StringBuilder sb = new StringBuilder();
+//            sb.append("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc");
+//            sb.append("?coords=" + coords);
+//            sb.append("&output=json");
+//            sb.append("&request=coordsToaddr");
+//            URL url = new URL(sb.toString());
+//            conn = (HttpURLConnection) url.openConnection();
+//            conn.setRequestMethod("GET");
+//            conn.setRequestProperty("X-NCP-APIGW-API-KEY-ID", ID);
+//            conn.setRequestProperty("X-NCP-APIGW-API-KEY", PW);
+//            int responseCode = conn.getResponseCode();
+//            if (responseCode == 400) {
+//                System.out.println("400");
+//            } else if (responseCode == 401) {
+//                System.out.println("401");
+//            } else if (responseCode == 500) {
+//                System.out.println("500");
+//            } else { // 성공
+//                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//                sb = new StringBuilder();
+//                String line = "";
+//                while ((line = br.readLine()) != null) {
+//                    sb.append(line);
+//                }
+//                System.out.println(sb.toString());
+//                return sb.toString();
+//            }
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
     @PostMapping("/image")
     @ResponseBody
     public ResponseEntity<Resource> showImageByCoords(@RequestParam String lng, @RequestParam String lat) {
+        Resource resource = myService.getImageByCoords(lng, lat);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_JPEG);
-
-        String ID = "brig18d08p";
-        String PW = "BjXKCJOwOn8BmyyrPaa07l9CRMg9jf6fpRqGPqtK";
-        String coords = lng + "," + lat;
-        HttpURLConnection conn = null;
-        JSONObject responseJson = null;
-        try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("https://naveropenapi.apigw.ntruss.com/map-static/v2/raster");
-            sb.append("?w=300&h=300");
-            sb.append("&center=" + coords);
-            sb.append("&level=16");
-            URL url = new URL(sb.toString());
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("X-NCP-APIGW-API-KEY-ID", ID);
-            conn.setRequestProperty("X-NCP-APIGW-API-KEY", PW);
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 400) {
-                System.out.println("400");
-            } else if (responseCode == 401) {
-                System.out.println("401");
-            } else if (responseCode == 500) {
-                System.out.println("500");
-            } else { // 성공
-                Resource resource = new InputStreamResource(conn.getInputStream());
-                return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
     }
 
 }
